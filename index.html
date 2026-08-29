@@ -32,6 +32,7 @@
         </p>
       </div>
       <div class="flex flex-wrap gap-2 justify-center">
+        <button onclick="resetData()" class="px-4 py-2 bg-red-100 text-red-700 border border-red-200 rounded shadow-sm hover:bg-red-200 text-sm font-medium transition-colors">🔄 Reset Data</button>
         <button onclick="exportCSV()" class="px-4 py-2 bg-emerald-600 text-white rounded shadow-sm hover:bg-emerald-700 text-sm font-medium transition-colors">📊 Export CSV</button>
         <button onclick="exportData()" class="px-4 py-2 bg-white border border-stone-300 rounded shadow-sm hover:bg-stone-50 text-sm font-medium transition-colors">📥 Export JSON</button>
         <label class="px-4 py-2 bg-white border border-stone-300 rounded shadow-sm hover:bg-stone-50 text-sm font-medium cursor-pointer transition-colors m-0">
@@ -201,6 +202,13 @@
       
       saveData();
       render();
+    }
+
+    function resetData() {
+      if(confirm('Are you sure you want to reset all data back to the original 60 guests? Any unsaved changes will be lost!')) {
+        localStorage.removeItem('weddingGuestlist');
+        location.reload();
+      }
     }
 
     function saveData() {
