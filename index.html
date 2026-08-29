@@ -180,6 +180,10 @@
       const saved = localStorage.getItem('weddingGuestlist');
       if (saved) { 
         guests = JSON.parse(saved); 
+        // If the array was saved as empty due to the previous bug, restore it
+        if (guests.length === 0) {
+          guests = [...initialGuests];
+        }
       } else {
         guests = [...initialGuests]; 
       }
