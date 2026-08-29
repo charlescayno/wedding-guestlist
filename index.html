@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Charles & Ynah's Guestlist</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- SortableJS for drag and drop -->
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
   <style>
     body {
       background-image: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('https://images.unsplash.com/photo-1522748906645-95d8ad052cb8?auto=format&fit=crop&q=80&w=2000');
@@ -14,33 +12,29 @@
       background-attachment: fixed;
       background-position: center;
     }
-    .guest-card { transition: transform 0.1s; cursor: grab; }
-    .guest-card:active { cursor: grabbing; }
-    .guest-card:hover { transform: scale(1.02); }
     .sort-btn { cursor: pointer; transition: color 0.2s; text-decoration-color: transparent;}
-    .sort-btn:hover { color: #db2777; text-decoration: underline; } /* pink-600 */
-    /* Ghost class for SortableJS */
-    .sortable-ghost { opacity: 0.4; background-color: #fce7f3; border: 2px dashed #fbcfe8; }
+    .sort-btn:hover { color: #db2777; text-decoration: underline; }
+    select { cursor: pointer; }
   </style>
 </head>
 <body class="min-h-screen font-sans text-stone-800 p-4 sm:p-8">
 
-  <div class="max-w-6xl mx-auto backdrop-blur-sm bg-white/40 p-6 rounded-xl shadow-lg border border-white/50">
+  <div class="max-w-6xl mx-auto backdrop-blur-sm bg-white/60 p-6 rounded-xl shadow-lg border border-white/50">
     <!-- Header -->
-    <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 bg-white/80 p-4 rounded-lg shadow-sm">
+    <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 bg-white/90 p-4 rounded-lg shadow-sm">
       <div>
         <h1 class="text-3xl font-bold text-stone-900 drop-shadow-sm">Charles & Ynah's Guestlist</h1>
         <p class="text-stone-600 text-sm mt-2 font-medium" id="stats-subtitle">
           Total: <span id="stat-total">0</span> | 
-          <span class="sort-btn" onclick="sortBySide('Charles')" title="Click to group Charles's guests at the top">Charles: <span id="stat-charles">0</span></span> | 
-          <span class="sort-btn text-pink-700" onclick="sortBySide('Ynah')" title="Click to group Ynah's guests at the top">Ynah: <span id="stat-ynah">0</span></span> | 
-          <span class="sort-btn" onclick="sortBySide('Both')" title="Click to group Shared guests at the top">Both: <span id="stat-both">0</span></span>
+          Charles: <span id="stat-charles">0</span> | 
+          <span class="text-pink-700">Ynah: <span id="stat-ynah">0</span></span> | 
+          Both: <span id="stat-both">0</span>
         </p>
       </div>
-      <div class="flex gap-2">
+      <div class="flex flex-wrap gap-2 justify-center">
         <button onclick="exportCSV()" class="px-4 py-2 bg-emerald-600 text-white rounded shadow-sm hover:bg-emerald-700 text-sm font-medium transition-colors">📊 Export CSV</button>
         <button onclick="exportData()" class="px-4 py-2 bg-white border border-stone-300 rounded shadow-sm hover:bg-stone-50 text-sm font-medium transition-colors">📥 Export JSON</button>
-        <label class="px-4 py-2 bg-white border border-stone-300 rounded shadow-sm hover:bg-stone-50 text-sm font-medium cursor-pointer transition-colors">
+        <label class="px-4 py-2 bg-white border border-stone-300 rounded shadow-sm hover:bg-stone-50 text-sm font-medium cursor-pointer transition-colors m-0">
           📤 Import JSON
           <input type="file" accept=".json" onchange="importData(event)" class="hidden">
         </label>
@@ -48,9 +42,9 @@
     </header>
 
     <!-- Add Guest Form -->
-    <div class="bg-white/90 p-4 rounded-lg shadow-sm mb-8 border border-white/50">
+    <div class="bg-white/95 p-4 rounded-lg shadow-sm mb-6 border border-white/50">
       <form id="add-guest-form" onsubmit="addGuest(event)" class="flex flex-wrap gap-4 items-end">
-        <div class="flex-1 min-w-[200px]">
+        <div class="flex-1 min-w-[150px]">
           <label class="block text-xs font-semibold text-stone-500 mb-1 uppercase tracking-wider">Guest Name</label>
           <input type="text" id="guest-name" required class="w-full px-3 py-2 border border-stone-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-400 bg-white/80">
         </div>
@@ -63,11 +57,25 @@
           </select>
         </div>
         <div class="w-full sm:w-auto">
+          <label class="block text-xs font-semibold text-stone-500 mb-1 uppercase tracking-wider">Category</label>
+          <select id="guest-category" class="w-full px-3 py-2 border border-stone-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-400 bg-white/80">
+            <option value="Family">Family</option>
+            <option value="High School Friends">High School Friends</option>
+            <option value="College Friends">College Friends</option>
+            <option value="Church Mates">Church Mates</option>
+            <option value="Best Friend">Best Friend</option>
+            <option value="DGroup">DGroup</option>
+            <option value="Ministry Mates">Ministry Mates</option>
+            <option value="Work Mates">Work Mates</option>
+            <option value="Uncategorized" selected>Uncategorized</option>
+          </select>
+        </div>
+        <div class="w-full sm:w-auto">
           <label class="block text-xs font-semibold text-stone-500 mb-1 uppercase tracking-wider">Tier</label>
           <select id="guest-tier" class="w-full px-3 py-2 border border-stone-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-400 bg-white/80">
-            <option value="A">A-List (Priority)</option>
-            <option value="B">B-List (If budget/space)</option>
-            <option value="C">C-List (Optional)</option>
+            <option value="A">A-List</option>
+            <option value="B">B-List</option>
+            <option value="C">C-List</option>
           </select>
         </div>
         <button type="submit" class="w-full sm:w-auto px-6 py-2 bg-stone-800 text-white font-medium rounded shadow hover:bg-stone-900 transition-colors">
@@ -76,95 +84,53 @@
       </form>
     </div>
 
-    <!-- Board -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      
-      <!-- A List -->
-      <div class="flex flex-col bg-emerald-50/90 rounded-lg p-4 border border-emerald-200 shadow-sm backdrop-blur-sm">
-        <div class="mb-4 flex justify-between items-center">
-          <div>
-            <h2 class="font-bold text-lg text-emerald-800">A-List</h2>
-            <p class="text-xs text-emerald-600">The Non-negotiables</p>
-          </div>
-          <span id="count-A" class="bg-emerald-200 text-emerald-900 text-xs font-bold px-2 py-1 rounded-full">0</span>
-        </div>
-        <div id="tier-A" data-tier="A" class="flex-1 flex flex-col gap-3 min-h-[150px] pb-4"></div>
-      </div>
-
-      <!-- B List -->
-      <div class="flex flex-col bg-amber-50/90 rounded-lg p-4 border border-amber-200 shadow-sm backdrop-blur-sm">
-        <div class="mb-4 flex justify-between items-center">
-          <div>
-            <h2 class="font-bold text-lg text-amber-800">B-List</h2>
-            <p class="text-xs text-amber-600">If space/budget allows</p>
-          </div>
-          <span id="count-B" class="bg-amber-200 text-amber-900 text-xs font-bold px-2 py-1 rounded-full">0</span>
-        </div>
-        <div id="tier-B" data-tier="B" class="flex-1 flex flex-col gap-3 min-h-[150px] pb-4"></div>
-      </div>
-
-      <!-- C List -->
-      <div class="flex flex-col bg-stone-100/90 rounded-lg p-4 border border-stone-300 shadow-sm backdrop-blur-sm">
-        <div class="mb-4 flex justify-between items-center">
-          <div>
-            <h2 class="font-bold text-lg text-stone-600">C-List</h2>
-            <p class="text-xs text-stone-500">Only if abundant space</p>
-          </div>
-          <span id="count-C" class="bg-stone-300 text-stone-800 text-xs font-bold px-2 py-1 rounded-full">0</span>
-        </div>
-        <div id="tier-C" data-tier="C" class="flex-1 flex flex-col gap-3 min-h-[150px] pb-4"></div>
-      </div>
-
+    <!-- Table -->
+    <div class="overflow-x-auto bg-white/95 rounded-lg shadow-sm border border-stone-200 max-h-[600px] overflow-y-auto">
+      <table class="w-full text-left border-collapse whitespace-nowrap">
+        <thead class="sticky top-0 bg-stone-100 z-10 shadow-sm">
+          <tr class="text-stone-600 text-xs uppercase tracking-wider border-b border-stone-200">
+            <th class="p-4 font-semibold cursor-pointer hover:bg-stone-200 select-none" onclick="sortTable('name')">Name ↕</th>
+            <th class="p-4 font-semibold cursor-pointer hover:bg-stone-200 select-none" onclick="sortTable('side')">Side ↕</th>
+            <th class="p-4 font-semibold cursor-pointer hover:bg-stone-200 select-none" onclick="sortTable('category')">Category ↕</th>
+            <th class="p-4 font-semibold cursor-pointer hover:bg-stone-200 select-none" onclick="sortTable('tier')">Tier ↕</th>
+            <th class="p-4 font-semibold text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="guest-table-body" class="divide-y divide-stone-100 text-sm">
+          <!-- Rows will be generated here -->
+        </tbody>
+      </table>
     </div>
   </div>
 
   <script>
-    // Initial data fallback in case local storage is empty
-    const initialGuests = [
-      { id: '1', name: 'Charlie', side: 'Charles', tier: 'A' },
-      { id: '2', name: 'Mama', side: 'Charles', tier: 'A' },
-      { id: '25', name: 'Kuya Renz', side: 'Ynah', tier: 'A' },
-      { id: '26', name: 'Ninang Ate Doray', side: 'Ynah', tier: 'A' },
-      { id: '60', name: 'Ate Aya (Painting/Giveaway)', side: 'Both', tier: 'A' }
-    ];
+    const categories = ['Family', 'High School Friends', 'College Friends', 'Church Mates', 'Best Friend', 'DGroup', 'Ministry Mates', 'Work Mates', 'Uncategorized'];
+    const sides = ['Charles', 'Ynah', 'Both'];
+    const tiers = ['A', 'B', 'C'];
 
     let guests = [];
+    let currentSort = 'name';
+    let sortDesc = false;
 
     function init() {
       const saved = localStorage.getItem('weddingGuestlist');
       if (saved) { 
         guests = JSON.parse(saved); 
-      } else { 
-        guests = [...initialGuests]; 
-        saveData();
-      }
-      render();
-      initDragAndDrop();
-    }
-
-    function initDragAndDrop() {
-      const tiers = ['A', 'B', 'C'];
-      tiers.forEach(tier => {
-        const el = document.getElementById(`tier-${tier}`);
-        new Sortable(el, {
-          group: 'shared',
-          animation: 150,
-          ghostClass: 'sortable-ghost',
-          onEnd: function (evt) {
-            const itemEl = evt.item;
-            const guestId = itemEl.getAttribute('data-id');
-            const toContainer = evt.to;
-            const newTier = toContainer.getAttribute('data-tier');
-            
-            const guestIndex = guests.findIndex(g => g.id === guestId);
-            if(guestIndex > -1) {
-              guests[guestIndex].tier = newTier;
-              saveData();
-              updateCounts();
-            }
-          },
+        // Migrate existing data to include categories automatically where possible
+        guests = guests.map(g => {
+          let name = g.name;
+          let category = g.category || 'Uncategorized';
+          if (name.includes('(HS friends)')) {
+            name = name.replace('(HS friends)', '').trim();
+            category = 'High School Friends';
+          }
+          return { ...g, name, category };
         });
-      });
+      } else {
+        guests = []; 
+      }
+      saveData();
+      render();
     }
 
     function saveData() {
@@ -177,11 +143,14 @@
       e.preventDefault();
       const name = document.getElementById('guest-name').value.trim();
       const side = document.getElementById('guest-side').value;
+      const category = document.getElementById('guest-category').value;
       const tier = document.getElementById('guest-tier').value;
       if (!name) return;
-      guests.push({ id: generateId(), name, side, tier });
+      
+      guests.push({ id: generateId(), name, side, category, tier });
       saveData();
       render();
+      
       document.getElementById('guest-name').value = '';
     }
 
@@ -193,13 +162,23 @@
       }
     }
 
-    function sortBySide(side) {
-      guests.sort((a, b) => {
-        if (a.side === side && b.side !== side) return -1;
-        if (a.side !== side && b.side === side) return 1;
-        return a.name.localeCompare(b.name);
-      });
-      saveData();
+    function changeField(id, field, value) {
+      const index = guests.findIndex(g => g.id === id);
+      if (index > -1) {
+        guests[index][field] = value;
+        saveData();
+        // Skip full re-render on change to avoid UI jumping, just update stats
+        updateStats();
+      }
+    }
+
+    function sortTable(field) {
+      if (currentSort === field) {
+        sortDesc = !sortDesc;
+      } else {
+        currentSort = field;
+        sortDesc = false;
+      }
       render();
     }
 
@@ -208,48 +187,83 @@
       if (side === 'Ynah') return 'bg-pink-100 text-pink-800';
       return 'bg-purple-100 text-purple-800';
     }
-
-    function updateCounts() {
-      ['A', 'B', 'C'].forEach(tier => {
-        const count = guests.filter(g => g.tier === tier).length;
-        document.getElementById(`count-${tier}`).innerText = count;
-      });
+    
+    function getTierBadgeColor(tier) {
+      if (tier === 'A') return 'bg-emerald-100 text-emerald-800 font-bold';
+      if (tier === 'B') return 'bg-amber-100 text-amber-800 font-bold';
+      return 'bg-stone-200 text-stone-700 font-bold';
     }
 
-    function render() {
-      ['A', 'B', 'C'].forEach(tier => {
-        const container = document.getElementById(`tier-${tier}`);
-        container.innerHTML = '';
-        
-        const tierGuests = guests.filter(g => g.tier === tier);
-        
-        tierGuests.forEach(guest => {
-          const card = document.createElement('div');
-          card.className = "guest-card bg-white/95 p-3 rounded shadow-sm border border-stone-200 flex justify-between items-center group";
-          card.setAttribute('data-id', guest.id);
-          card.innerHTML = `
-            <div>
-              <div class="font-medium text-sm text-stone-800 pointer-events-none">${guest.name}</div>
-              <span class="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${getSideBadgeColor(guest.side)} pointer-events-none">
-                ${guest.side}
-              </span>
-            </div>
-            <div class="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <button onclick="removeGuest('${guest.id}')" class="text-red-500 hover:text-red-700 px-2 py-1 bg-red-50 rounded border border-red-100 text-xs shadow-sm">
-                Delete
-              </button>
-            </div>
-          `;
-          container.appendChild(card);
-        });
-      });
-
-      updateCounts();
-
+    function updateStats() {
       document.getElementById('stat-total').innerText = guests.length;
       document.getElementById('stat-charles').innerText = guests.filter(g => g.side === 'Charles').length;
       document.getElementById('stat-ynah').innerText = guests.filter(g => g.side === 'Ynah').length;
       document.getElementById('stat-both').innerText = guests.filter(g => g.side === 'Both').length;
+    }
+
+    function render() {
+      // Apply Sort
+      guests.sort((a, b) => {
+        let valA = (a[currentSort] || '').toLowerCase();
+        let valB = (b[currentSort] || '').toLowerCase();
+        if (valA < valB) return sortDesc ? 1 : -1;
+        if (valA > valB) return sortDesc ? -1 : 1;
+        return 0;
+      });
+
+      const tbody = document.getElementById('guest-table-body');
+      tbody.innerHTML = '';
+      
+      guests.forEach(guest => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-pink-50/50 transition-colors";
+        
+        // Category options
+        const catOptions = categories.map(c => 
+          `<option value="${c}" ${guest.category === c ? 'selected' : ''}>${c}</option>`
+        ).join('');
+        
+        // Side options
+        const sideOptions = sides.map(s => 
+          `<option value="${s}" ${guest.side === s ? 'selected' : ''}>${s}</option>`
+        ).join('');
+        
+        // Tier options
+        const tierOptions = tiers.map(t => 
+          `<option value="${t}" ${guest.tier === t ? 'selected' : ''}>${t}-List</option>`
+        ).join('');
+
+        tr.innerHTML = `
+          <td class="p-4 font-medium text-stone-800 w-1/3">
+            <input type="text" value="${guest.name}" onchange="changeField('${guest.id}', 'name', this.value)" class="bg-transparent border-b border-transparent hover:border-stone-300 focus:border-pink-400 focus:outline-none w-full px-1 py-1">
+          </td>
+          <td class="p-4 w-1/6">
+            <select onchange="changeField('${guest.id}', 'side', this.value)" class="text-xs border border-transparent hover:border-stone-300 rounded ${getSideBadgeColor(guest.side)} py-1 px-2 focus:outline-none appearance-none cursor-pointer">
+              ${sideOptions}
+            </select>
+          </td>
+          <td class="p-4 w-1/4">
+            <select onchange="changeField('${guest.id}', 'category', this.value)" class="text-xs border border-transparent hover:border-stone-300 rounded bg-stone-100 text-stone-700 py-1 px-2 focus:outline-none appearance-none cursor-pointer w-full">
+              ${catOptions}
+            </select>
+          </td>
+          <td class="p-4 w-1/6">
+            <select onchange="changeField('${guest.id}', 'tier', this.value)" class="text-xs border border-transparent hover:border-stone-300 rounded ${getTierBadgeColor(guest.tier)} py-1 px-2 focus:outline-none appearance-none cursor-pointer">
+              ${tierOptions}
+            </select>
+          </td>
+          <td class="p-4 text-right w-[10%]">
+            <button onclick="removeGuest('${guest.id}')" class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded transition-colors" title="Delete Guest">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      updateStats();
     }
 
     function exportData() {
@@ -263,23 +277,19 @@
 
     function exportCSV() {
       if (guests.length === 0) return;
-      
-      const headers = ['Name', 'Side', 'Tier'];
+      const headers = ['Name', 'Side', 'Category', 'Tier'];
       const csvRows = [headers.join(',')];
       
       guests.forEach(guest => {
-        // Escape quotes and commas
-        const name = `"${guest.name.replace(/"/g, '""')}"`;
-        const side = guest.side;
-        const tier = guest.tier;
-        csvRows.push([name, side, tier].join(','));
+        const name = \`"\${guest.name.replace(/"/g, '""')}"\`;
+        csvRows.push([name, guest.side, guest.category, guest.tier].join(','));
       });
       
-      const csvString = csvRows.join('\n');
+      const csvString = csvRows.join('\\n');
       const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       
-      if (navigator.msSaveBlob) { // IE 10+
+      if (navigator.msSaveBlob) {
         navigator.msSaveBlob(blob, 'wedding_guestlist.csv');
       } else {
         const url = URL.createObjectURL(blob);
