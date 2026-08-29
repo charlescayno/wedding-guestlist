@@ -108,6 +108,70 @@
     const sides = ['Charles', 'Ynah', 'Both'];
     const tiers = ['A', 'B', 'C'];
 
+    // Restored the default data so the list isn't empty!
+    const initialGuests = [
+      { id: '1', name: 'Charlie', side: 'Charles', tier: 'A' },
+      { id: '2', name: 'Mama', side: 'Charles', tier: 'A' },
+      { id: '3', name: 'Papa', side: 'Charles', tier: 'A' },
+      { id: '4', name: 'Karla', side: 'Charles', tier: 'A' },
+      { id: '5', name: 'Meeko', side: 'Charles', tier: 'A' },
+      { id: '6', name: 'Justine', side: 'Charles', tier: 'A' },
+      { id: '7', name: 'Dave', side: 'Charles', tier: 'A' },
+      { id: '8', name: 'Rey', side: 'Charles', tier: 'A' },
+      { id: '9', name: 'Marco', side: 'Charles', tier: 'A' },
+      { id: '10', name: 'Joshua', side: 'Charles', tier: 'A' },
+      { id: '11', name: 'Diego', side: 'Charles', tier: 'A' },
+      { id: '12', name: 'CDO', side: 'Charles', tier: 'A' },
+      { id: '13', name: 'Sandra', side: 'Charles', tier: 'A' },
+      { id: '14', name: 'Jonelle', side: 'Charles', tier: 'A' },
+      { id: '15', name: 'Juvene', side: 'Charles', tier: 'A' },
+      { id: '16', name: 'Lhuigi (HS friends)', side: 'Charles', tier: 'A' },
+      { id: '17', name: 'Felix (HS friends)', side: 'Charles', tier: 'A' },
+      { id: '18', name: 'By', side: 'Charles', tier: 'A' },
+      { id: '19', name: 'Jian', side: 'Charles', tier: 'A' },
+      { id: '20', name: 'Jed', side: 'Charles', tier: 'A' },
+      { id: '21', name: 'Josiah', side: 'Charles', tier: 'A' },
+      { id: '22', name: 'Ate Jessa', side: 'Charles', tier: 'A' },
+      { id: '23', name: 'Ivan', side: 'Charles', tier: 'A' },
+      { id: '24', name: 'Rhanz', side: 'Charles', tier: 'A' },
+      { id: '25', name: 'Kuya Renz', side: 'Ynah', tier: 'A' },
+      { id: '26', name: 'Ninang Ate Doray', side: 'Ynah', tier: 'A' },
+      { id: '27', name: 'Jeric Orgasan', side: 'Ynah', tier: 'A' },
+      { id: '28', name: 'Doris Orgasan', side: 'Ynah', tier: 'A' },
+      { id: '29', name: 'Gerry Orgasan', side: 'Ynah', tier: 'A' },
+      { id: '30', name: 'Renz Vidal', side: 'Ynah', tier: 'A' },
+      { id: '31', name: 'Jeryll Orgasan (MOH)', side: 'Ynah', tier: 'A' },
+      { id: '32', name: 'Mae Orgasan (MOH)', side: 'Ynah', tier: 'A' },
+      { id: '33', name: 'Pat Adlawan (Flowers)', side: 'Ynah', tier: 'A' },
+      { id: '34', name: 'Charm', side: 'Ynah', tier: 'A' },
+      { id: '35', name: 'Yamsie', side: 'Ynah', tier: 'A' },
+      { id: '36', name: 'Wemby (Host)', side: 'Ynah', tier: 'A' },
+      { id: '37', name: 'Gigi', side: 'Ynah', tier: 'A' },
+      { id: '38', name: 'Pocholo', side: 'Ynah', tier: 'A' },
+      { id: '39', name: 'Chloe', side: 'Ynah', tier: 'A' },
+      { id: '40', name: 'Jenica', side: 'Ynah', tier: 'A' },
+      { id: '41', name: 'MJ', side: 'Ynah', tier: 'A' },
+      { id: '42', name: 'Nichole Tolentino (Graphics Design)', side: 'Ynah', tier: 'A' },
+      { id: '43', name: 'Jerald', side: 'Ynah', tier: 'A' },
+      { id: '44', name: 'Princess', side: 'Ynah', tier: 'A' },
+      { id: '45', name: 'Lorielle', side: 'Ynah', tier: 'A' },
+      { id: '46', name: 'Ella', side: 'Ynah', tier: 'A' },
+      { id: '47', name: 'Ivy (Souvenir)', side: 'Ynah', tier: 'A' },
+      { id: '48', name: 'Jhon', side: 'Ynah', tier: 'A' },
+      { id: '49', name: 'Laica', side: 'Ynah', tier: 'A' },
+      { id: '50', name: 'Ate Rachel', side: 'Ynah', tier: 'A' },
+      { id: '51', name: 'Irish (Architect)', side: 'Ynah', tier: 'A' },
+      { id: '52', name: 'Yani', side: 'Ynah', tier: 'A' },
+      { id: '53', name: 'Ate Keanna', side: 'Ynah', tier: 'A' },
+      { id: '54', name: 'Trixie', side: 'Ynah', tier: 'A' },
+      { id: '55', name: 'Danna', side: 'Ynah', tier: 'A' },
+      { id: '56', name: 'Nicole', side: 'Ynah', tier: 'A' },
+      { id: '57', name: 'Claude', side: 'Ynah', tier: 'A' },
+      { id: '58', name: 'Casey', side: 'Ynah', tier: 'A' },
+      { id: '59', name: 'Mei Mei (Drawing Artist)', side: 'Ynah', tier: 'A' },
+      { id: '60', name: 'Ate Aya (Painting/Giveaway)', side: 'Both', tier: 'A' }
+    ];
+
     let guests = [];
     let currentSort = 'name';
     let sortDesc = false;
@@ -116,19 +180,21 @@
       const saved = localStorage.getItem('weddingGuestlist');
       if (saved) { 
         guests = JSON.parse(saved); 
-        // Migrate existing data to include categories automatically where possible
-        guests = guests.map(g => {
-          let name = g.name;
-          let category = g.category || 'Uncategorized';
-          if (name.includes('(HS friends)')) {
-            name = name.replace('(HS friends)', '').trim();
-            category = 'High School Friends';
-          }
-          return { ...g, name, category };
-        });
       } else {
-        guests = []; 
+        guests = [...initialGuests]; 
       }
+      
+      // Migrate data to include categories automatically where possible
+      guests = guests.map(g => {
+        let name = g.name;
+        let category = g.category || 'Uncategorized';
+        if (name.includes('(HS friends)')) {
+          name = name.replace('(HS friends)', '').trim();
+          category = 'High School Friends';
+        }
+        return { ...g, name, category };
+      });
+      
       saveData();
       render();
     }
