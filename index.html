@@ -7,27 +7,100 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
   <style>
-    body {
-      background: #f5f5f4;
-    }
+    body { background: #f5f5f4; }
     .guest-row { cursor: grab; }
     .guest-row:active { cursor: grabbing; }
     .sortable-ghost { opacity: 0.4; background: #fce7f3; }
     .sort-active { background: #292524; color: #fff; }
+
+    .table-wrap {
+      width: 200px;
+      height: 200px;
+      position: relative;
+      margin: 0 auto;
+    }
+    .table-disk {
+      position: absolute;
+      inset: 28%;
+      border-radius: 50%;
+      background: #e7e5e4;
+      border: 2px solid #a8a29e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: #57534e;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .seat {
+      position: absolute;
+      width: 44px;
+      height: 44px;
+      margin-left: -22px;
+      margin-top: -22px;
+      left: 50%;
+      top: 50%;
+      border-radius: 50%;
+      border: 1.5px dashed #a8a29e;
+      background: #fafaf9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      line-height: 1.1;
+      text-align: center;
+      padding: 2px;
+      z-index: 2;
+      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    }
+    .seat.filled {
+      border-style: solid;
+      border-color: #78716c;
+      background: #fff;
+      cursor: grab;
+      font-weight: 500;
+      color: #292524;
+    }
+    .seat.drag-over {
+      border-color: #db2777;
+      background: #fce7f3;
+      box-shadow: 0 0 0 3px rgba(219, 39, 119, 0.2);
+    }
+    .seat .seat-x {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #fff;
+      border: 1px solid #d6d3d1;
+      color: #a8a29e;
+      font-size: 10px;
+      line-height: 12px;
+      display: none;
+      cursor: pointer;
+      z-index: 3;
+    }
+    .seat.filled:hover .seat-x { display: block; }
+    .seat .seat-x:hover { color: #dc2626; border-color: #fecaca; }
   </style>
 </head>
 <body class="min-h-screen font-sans text-stone-800 text-sm">
 
   <div class="max-w-5xl mx-auto p-3 sm:p-4">
-    <!-- Header -->
     <header class="flex flex-wrap items-center justify-between gap-2 mb-3">
       <div>
-        <h1 class="text-lg font-semibold text-stone-900">Charles & Ynah's Guestlist</h1>
+        <h1 class="text-lg font-semibold text-stone-900">Charles &amp; Ynah's Guestlist</h1>
         <p class="text-xs text-stone-500 mt-0.5">
           Total <span id="stat-total" class="font-medium text-stone-700">0</span>
           · Charles <span id="stat-charles" class="font-medium text-blue-700">0</span>
           · Ynah <span id="stat-ynah" class="font-medium text-pink-700">0</span>
           · Both <span id="stat-both" class="font-medium text-stone-700">0</span>
+          · Seated <span id="stat-seated" class="font-medium text-stone-700">0</span>
         </p>
       </div>
       <div class="flex flex-wrap items-center gap-1.5">
@@ -36,8 +109,8 @@
           <button type="button" id="sort-name" onclick="setSort('name')" class="px-2 py-1 text-xs hover:bg-stone-100 border-l border-stone-200">Name</button>
           <button type="button" id="sort-side" onclick="setSort('side')" class="px-2 py-1 text-xs hover:bg-stone-100 border-l border-stone-200">Side</button>
         </div>
-        <button onclick="exportCSV()" class="px-2 py-1 bg-white border border-stone-300 rounded text-xs hover:bg-stone-50">CSV</button>
-        <button onclick="exportData()" class="px-2 py-1 bg-white border border-stone-300 rounded text-xs hover:bg-stone-50">JSON</button>
+        <button type="button" onclick="exportCSV()" class="px-2 py-1 bg-white border border-stone-300 rounded text-xs hover:bg-stone-50">CSV</button>
+        <button type="button" onclick="exportData()" class="px-2 py-1 bg-white border border-stone-300 rounded text-xs hover:bg-stone-50">JSON</button>
         <label class="px-2 py-1 bg-white border border-stone-300 rounded text-xs hover:bg-stone-50 cursor-pointer">
           Import
           <input type="file" accept=".json" onchange="importData(event)" class="hidden">
@@ -45,7 +118,6 @@
       </div>
     </header>
 
-    <!-- Add Guest -->
     <form id="add-guest-form" onsubmit="addGuest(event)" class="flex flex-wrap gap-2 items-center mb-3 bg-white border border-stone-200 rounded p-2">
       <input type="text" id="guest-name" required placeholder="Guest name" class="flex-1 min-w-[140px] px-2 py-1.5 border border-stone-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-400">
       <select id="guest-side" class="px-2 py-1.5 border border-stone-300 rounded text-sm bg-white">
@@ -61,8 +133,8 @@
       <button type="submit" class="px-3 py-1.5 bg-stone-800 text-white text-sm rounded hover:bg-stone-900">Add</button>
     </form>
 
-    <!-- Board -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+    <!-- Guest lists -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
       <section class="bg-white border border-emerald-200 rounded">
         <div class="flex items-center justify-between px-2.5 py-1.5 border-b border-emerald-100 bg-emerald-50">
           <h2 class="font-semibold text-emerald-900 text-xs uppercase tracking-wide">A-List <span class="font-normal text-emerald-600 normal-case tracking-normal">· must invite</span></h2>
@@ -70,7 +142,6 @@
         </div>
         <div id="tier-A" data-tier="A" class="flex flex-col min-h-[80px] p-1"></div>
       </section>
-
       <section class="bg-white border border-amber-200 rounded">
         <div class="flex items-center justify-between px-2.5 py-1.5 border-b border-amber-100 bg-amber-50">
           <h2 class="font-semibold text-amber-900 text-xs uppercase tracking-wide">B-List <span class="font-normal text-amber-600 normal-case tracking-normal">· if space</span></h2>
@@ -78,7 +149,6 @@
         </div>
         <div id="tier-B" data-tier="B" class="flex flex-col min-h-[80px] p-1"></div>
       </section>
-
       <section class="bg-white border border-stone-200 rounded">
         <div class="flex items-center justify-between px-2.5 py-1.5 border-b border-stone-100 bg-stone-50">
           <h2 class="font-semibold text-stone-700 text-xs uppercase tracking-wide">C-List <span class="font-normal text-stone-500 normal-case tracking-normal">· optional</span></h2>
@@ -87,6 +157,22 @@
         <div id="tier-C" data-tier="C" class="flex flex-col min-h-[80px] p-1"></div>
       </section>
     </div>
+
+    <!-- Circular tables -->
+    <section class="bg-white border border-stone-200 rounded">
+      <div class="flex flex-wrap items-center justify-between gap-2 px-2.5 py-1.5 border-b border-stone-100 bg-stone-50">
+        <h2 class="font-semibold text-stone-800 text-xs uppercase tracking-wide">Seating <span class="font-normal text-stone-500 normal-case tracking-normal">· drag guests onto seats</span></h2>
+        <div class="flex items-center gap-1.5">
+          <label class="text-xs text-stone-500 flex items-center gap-1">
+            Seats
+            <input type="number" id="new-table-seats" min="4" max="16" value="8" class="w-12 px-1 py-0.5 border border-stone-300 rounded text-xs">
+          </label>
+          <button type="button" onclick="addTable()" class="px-2 py-1 bg-stone-800 text-white text-xs rounded hover:bg-stone-900">Add table</button>
+        </div>
+      </div>
+      <div id="tables-board" class="flex flex-wrap gap-4 p-3 justify-center sm:justify-start"></div>
+      <p id="tables-empty" class="hidden text-xs text-stone-400 text-center py-6">No tables yet — add one, then drag guests from the lists onto seats.</p>
+    </section>
   </div>
 
   <script>
@@ -100,8 +186,10 @@
     ];
 
     let guests = [];
+    let tables = [];
     let sortMode = localStorage.getItem('weddingGuestlistSort') || 'name';
     let sortables = [];
+    let dragGuestId = null;
 
     function init() {
       const saved = localStorage.getItem('weddingGuestlist');
@@ -111,6 +199,22 @@
         guests = [...initialGuests];
         saveData();
       }
+      guests.forEach(g => {
+        if (g.tableId === undefined) g.tableId = null;
+        if (g.seat === undefined) g.seat = null;
+      });
+
+      const savedTables = localStorage.getItem('weddingTables');
+      if (savedTables) {
+        tables = JSON.parse(savedTables);
+      } else {
+        tables = [
+          { id: generateId(), name: 'Table 1', seats: 8 },
+          { id: generateId(), name: 'Table 2', seats: 8 }
+        ];
+        saveTables();
+      }
+
       applySort();
       render();
       initDragAndDrop();
@@ -152,6 +256,10 @@
 
     function saveData() {
       localStorage.setItem('weddingGuestlist', JSON.stringify(guests));
+    }
+
+    function saveTables() {
+      localStorage.setItem('weddingTables', JSON.stringify(tables));
     }
 
     function generateId() {
@@ -200,7 +308,7 @@
       const side = document.getElementById('guest-side').value;
       const tier = document.getElementById('guest-tier').value;
       if (!name) return;
-      guests.push({ id: generateId(), name, side, tier });
+      guests.push({ id: generateId(), name, side, tier, tableId: null, seat: null });
       applySort();
       saveData();
       render();
@@ -215,10 +323,97 @@
       render();
     }
 
+    function addTable() {
+      const seats = Math.min(16, Math.max(4, parseInt(document.getElementById('new-table-seats').value, 10) || 8));
+      const n = tables.length + 1;
+      tables.push({ id: generateId(), name: `Table ${n}`, seats });
+      saveTables();
+      renderTables();
+    }
+
+    function removeTable(tableId) {
+      if (!confirm('Remove this table? Guests will be unseated.')) return;
+      guests.forEach(g => {
+        if (g.tableId === tableId) {
+          g.tableId = null;
+          g.seat = null;
+        }
+      });
+      tables = tables.filter(t => t.id !== tableId);
+      saveTables();
+      saveData();
+      render();
+    }
+
+    function renameTable(tableId) {
+      const table = tables.find(t => t.id === tableId);
+      if (!table) return;
+      const name = prompt('Table name', table.name);
+      if (name === null) return;
+      const trimmed = name.trim();
+      if (!trimmed) return;
+      table.name = trimmed;
+      saveTables();
+      renderTables();
+      renderGuestLists();
+    }
+
+    function seatGuest(guestId, tableId, seat) {
+      const guest = guests.find(g => g.id === guestId);
+      if (!guest) return;
+      const table = tables.find(t => t.id === tableId);
+      if (!table || seat < 0 || seat >= table.seats) return;
+
+      const occupant = guests.find(g => g.tableId === tableId && g.seat === seat && g.id !== guestId);
+      if (occupant) {
+        // Swap seats if dragging from another seat
+        if (guest.tableId != null && guest.seat != null) {
+          occupant.tableId = guest.tableId;
+          occupant.seat = guest.seat;
+        } else {
+          occupant.tableId = null;
+          occupant.seat = null;
+        }
+      }
+
+      guest.tableId = tableId;
+      guest.seat = seat;
+      saveData();
+      render();
+    }
+
+    function unseatGuest(guestId) {
+      const guest = guests.find(g => g.id === guestId);
+      if (!guest) return;
+      guest.tableId = null;
+      guest.seat = null;
+      saveData();
+      render();
+    }
+
     function getSideBadgeColor(side) {
       if (side === 'Charles') return 'bg-blue-50 text-blue-700';
       if (side === 'Ynah') return 'bg-pink-50 text-pink-700';
       return 'bg-stone-100 text-stone-600';
+    }
+
+    function tableLabel(tableId) {
+      const t = tables.find(x => x.id === tableId);
+      return t ? t.name : '';
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function shortName(name) {
+      const parts = name.trim().split(/\s+/);
+      if (parts.length === 1) return parts[0].slice(0, 8);
+      return (parts[0].slice(0, 6) + ' ' + parts[parts.length - 1].charAt(0) + '.').slice(0, 10);
     }
 
     function updateCounts() {
@@ -233,20 +428,51 @@
       document.getElementById('stat-charles').innerText = guests.filter(g => g.side === 'Charles').length;
       document.getElementById('stat-ynah').innerText = guests.filter(g => g.side === 'Ynah').length;
       document.getElementById('stat-both').innerText = guests.filter(g => g.side === 'Both').length;
+      document.getElementById('stat-seated').innerText = guests.filter(g => g.tableId).length;
     }
 
-    function render() {
+    function onGuestDragStart(e, guestId) {
+      dragGuestId = guestId;
+      e.dataTransfer.setData('text/plain', guestId);
+      e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function onSeatDragOver(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add('drag-over');
+      e.dataTransfer.dropEffect = 'move';
+    }
+
+    function onSeatDragLeave(e) {
+      e.currentTarget.classList.remove('drag-over');
+    }
+
+    function onSeatDrop(e, tableId, seat) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      const id = e.dataTransfer.getData('text/plain') || dragGuestId;
+      dragGuestId = null;
+      if (id) seatGuest(id, tableId, seat);
+    }
+
+    function renderGuestLists() {
       ['A', 'B', 'C'].forEach(tier => {
         const container = document.getElementById(`tier-${tier}`);
         container.innerHTML = '';
         guests.filter(g => g.tier === tier).forEach(guest => {
           const row = document.createElement('div');
-          row.className = 'guest-row flex items-center gap-2 px-1.5 py-1 rounded hover:bg-stone-50 group';
+          row.className = 'guest-row flex items-center gap-1.5 px-1.5 py-1 rounded hover:bg-stone-50 group';
           row.setAttribute('data-id', guest.id);
+          row.setAttribute('draggable', 'true');
+          row.addEventListener('dragstart', e => onGuestDragStart(e, guest.id));
+          const seated = guest.tableId
+            ? `<span class="shrink-0 text-[9px] px-1 py-0.5 rounded bg-stone-200 text-stone-600 pointer-events-none" title="Seated">${escapeHtml(tableLabel(guest.tableId))}</span>`
+            : '';
           row.innerHTML = `
-            <span class="flex-1 truncate text-stone-800 pointer-events-none">${guest.name}</span>
+            <span class="flex-1 truncate text-stone-800 pointer-events-none">${escapeHtml(guest.name)}</span>
+            ${seated}
             <span class="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded ${getSideBadgeColor(guest.side)} pointer-events-none">${guest.side}</span>
-            <button onclick="removeGuest('${guest.id}')" class="shrink-0 text-stone-300 hover:text-red-600 text-xs opacity-0 group-hover:opacity-100 px-1" title="Remove">×</button>
+            <button type="button" onclick="removeGuest('${guest.id}')" class="shrink-0 text-stone-300 hover:text-red-600 text-xs opacity-0 group-hover:opacity-100 px-1" title="Remove">×</button>
           `;
           container.appendChild(row);
         });
@@ -255,19 +481,80 @@
       updateStats();
     }
 
+    function renderTables() {
+      const board = document.getElementById('tables-board');
+      const empty = document.getElementById('tables-empty');
+      board.innerHTML = '';
+      empty.classList.toggle('hidden', tables.length > 0);
+
+      tables.forEach(table => {
+        const card = document.createElement('div');
+        card.className = 'border border-stone-200 rounded p-2 bg-stone-50/50';
+        const seatedCount = guests.filter(g => g.tableId === table.id).length;
+
+        const header = document.createElement('div');
+        header.className = 'flex items-center justify-between gap-2 mb-1 px-0.5';
+        header.innerHTML = `
+          <button type="button" onclick="renameTable('${table.id}')" class="text-xs font-semibold text-stone-700 hover:underline truncate" title="Rename">${escapeHtml(table.name)}</button>
+          <span class="text-[10px] text-stone-500 tabular-nums">${seatedCount}/${table.seats}</span>
+          <button type="button" onclick="removeTable('${table.id}')" class="text-stone-300 hover:text-red-600 text-xs" title="Remove table">×</button>
+        `;
+        card.appendChild(header);
+
+        const wrap = document.createElement('div');
+        wrap.className = 'table-wrap';
+        wrap.innerHTML = `<div class="table-disk">${escapeHtml(table.name)}<br><span style="font-weight:400;font-size:10px">${seatedCount}/${table.seats}</span></div>`;
+
+        const radius = 78;
+        for (let i = 0; i < table.seats; i++) {
+          const angle = (i / table.seats) * Math.PI * 2 - Math.PI / 2;
+          const x = Math.cos(angle) * radius;
+          const y = Math.sin(angle) * radius;
+          const occupant = guests.find(g => g.tableId === table.id && g.seat === i);
+
+          const seat = document.createElement('div');
+          seat.className = 'seat' + (occupant ? ' filled' : '');
+          seat.style.transform = `translate(${x}px, ${y}px)`;
+          seat.title = occupant ? occupant.name : `Empty seat ${i + 1}`;
+          seat.addEventListener('dragover', onSeatDragOver);
+          seat.addEventListener('dragleave', onSeatDragLeave);
+          seat.addEventListener('drop', e => onSeatDrop(e, table.id, i));
+
+          if (occupant) {
+            seat.setAttribute('draggable', 'true');
+            seat.addEventListener('dragstart', e => onGuestDragStart(e, occupant.id));
+            seat.innerHTML = `<span class="pointer-events-none">${escapeHtml(shortName(occupant.name))}</span><button type="button" class="seat-x" onclick="event.stopPropagation(); unseatGuest('${occupant.id}')" title="Unseat">×</button>`;
+          } else {
+            seat.textContent = '';
+          }
+          wrap.appendChild(seat);
+        }
+
+        card.appendChild(wrap);
+        board.appendChild(card);
+      });
+    }
+
+    function render() {
+      renderGuestLists();
+      renderTables();
+    }
+
     function exportData() {
-      const dataStr = JSON.stringify(guests, null, 2);
+      const payload = { guests, tables };
       const link = document.createElement('a');
-      link.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+      link.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(payload, null, 2));
       link.download = 'wedding_guestlist_data.json';
       link.click();
     }
 
     function exportCSV() {
       if (guests.length === 0) return;
-      const rows = [['Name', 'Side', 'Tier'].join(',')];
+      const rows = [['Name', 'Side', 'Tier', 'Table', 'Seat'].join(',')];
       guests.forEach(g => {
-        rows.push([`"${g.name.replace(/"/g, '""')}"`, g.side, g.tier].join(','));
+        const tName = g.tableId ? tableLabel(g.tableId) : '';
+        const seat = g.seat != null ? String(g.seat + 1) : '';
+        rows.push([`"${g.name.replace(/"/g, '""')}"`, g.side, g.tier, `"${tName.replace(/"/g, '""')}"`, seat].join(','));
       });
       const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
@@ -283,13 +570,26 @@
       reader.onload = function (e) {
         try {
           const imported = JSON.parse(e.target.result);
-          if (!Array.isArray(imported)) {
+          if (Array.isArray(imported)) {
+            guests = imported.map(g => ({
+              ...g,
+              tableId: g.tableId ?? null,
+              seat: g.seat ?? null
+            }));
+          } else if (imported && Array.isArray(imported.guests)) {
+            guests = imported.guests.map(g => ({
+              ...g,
+              tableId: g.tableId ?? null,
+              seat: g.seat ?? null
+            }));
+            if (Array.isArray(imported.tables)) tables = imported.tables;
+          } else {
             alert('Invalid file format.');
             return;
           }
-          guests = imported;
           applySort();
           saveData();
+          saveTables();
           render();
           alert('Data imported successfully!');
         } catch (err) {
